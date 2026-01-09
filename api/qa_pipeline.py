@@ -11,11 +11,11 @@ class QAPipeline:
         self.store.add_embeddings(embs, texts)
 
     def answer(self, query: str) -> tuple[str, List[str]]:
-        q_emb = embed_texts([query])<a href="" class="citation-link" target="_blank" style="vertical-align: super; font-size: 0.8em; margin-left: 3px;">[0]</a>
+        q_emb = embed_texts([query])[0]
         sources = self.store.search(q_emb, k=3)
         # Build a simple prompt with sources
         context = "\n".join(sources)
         prompt = f"Use the following context to answer:\n{context}\nQuestion: {query}\nAnswer:"
         # Call LM here (stub)
-        answer = "This is a placeholder answer using context: " + (sources<a href="" class="citation-link" target="_blank" style="vertical-align: super; font-size: 0.8em; margin-left: 3px;">[0]</a> if sources else "no sources")
+        answer = "This is a placeholder answer using context: " + (sources[0] if sources else "no sources")
         return answer, sources

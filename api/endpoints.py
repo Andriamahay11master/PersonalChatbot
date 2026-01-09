@@ -30,3 +30,15 @@ async def upload_documents(files: List[UploadFile] = File(...)):
         # save to data/uploads and process
     return {"ok": True, "count": len(files)}
 
+# inside chat() after imports
+from .qa_pipeline import QAPipeline
+
+qa = QAPipeline()
+# Example ingestion step (in real app, call /upload to ingest)
+# qa.ingest_documents(["Sample document text..."])
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(req: ChatRequest):
+    answer, sources = qa.answer(req.prompt)
+    return ChatResponse(answer=answer, sources=sources)
+

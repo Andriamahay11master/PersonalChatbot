@@ -19,3 +19,14 @@ class ChatResponse(BaseModel):
 async def chat(req: ChatRequest):
     # TODO: wire to your QA pipeline: retrieve docs, run LM, format response
     return ChatResponse(answer="This is a stub. Implement QA pipeline.", sources=[])
+
+# Add to same file
+@router.post("/upload", status_code=200)
+async def upload_documents(files: List[UploadFile] = File(...)):
+    # Save files to disk, extract text, create embeddings, update vector store
+    # This is a placeholder; implement with your chosen libs
+    for f in files:
+        contents = await f.read()
+        # save to data/uploads and process
+    return {"ok": True, "count": len(files)}
+

@@ -15,4 +15,9 @@ if st.button("Ask"):
     # Send to backend /api/chat
     resp = requests.post("http://localhost:8000/api/chat", json={"prompt": user_input})
     st.write(resp.json().get("answer", "No answer"))
+    sources = resp.json().get("sources", [])
+    if sources:
+        st.write("Sources:")
+        for src in sources:
+            st.write(f"- {src}")
     

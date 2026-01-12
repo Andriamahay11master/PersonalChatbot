@@ -1,0 +1,6 @@
+# Example configuration
+embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+vector_store_type: "faiss"
+max_upload_size: 10MB
+api_host: "localhost"
+api_port: 8000

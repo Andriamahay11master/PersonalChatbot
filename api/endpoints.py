@@ -1,44 +1,53 @@
 #--------------------routes for chat, upload-file, and other endpoints--------------------#
 # api/endpoints.py
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
+
+from .schemas import ChatRequest, ChatResponse, UploadResponse, ErrorResponse, HealthResponse
+from .qa_pipeline import QAPipeline
 
 router = APIRouter()
 
-class ChatRequest(BaseModel):
-    prompt: str
-    history: Optional[List[dict]] = None  # optional chat history for context
-
-class ChatResponse(BaseModel):
-    answer: str
-    sources: List[str] = []
-
-# Placeholder for real pipeline integration
-@router.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest):
-    # TODO: wire to your QA pipeline: retrieve docs, run LM, format response
-    return ChatResponse(answer="This is a stub. Implement QA pipeline.", sources=[])
-
-# Add to same file
-@router.post("/upload", status_code=200)
-async def upload_documents(files: List[UploadFile] = File(...)):
-    # Save files to disk, extract text, create embeddings, update vector store
-    # This is a placeholder; implement with your chosen libs
-    for f in files:
-        contents = await f.read()
-        # save to data/uploads and process
-    return {"ok": True, "count": len(files)}
-
-# inside chat() after imports
-from .qa_pipeline import QAPipeline
-
+# Initialize QA pipeline
 qa = QAPipeline()
-# Example ingestion step (in real app, call /upload to ingest)
-# qa.ingest_documents(["Sample document text..."])
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest):
-    answer, sources = qa.answer(req.prompt)
-    return ChatResponse(answer=answer, sources=sources)
+async def chat_endpoint(req: ChatRequest):
+    """Chat endpoint for Q&A with document retrieval."""
+    try:
+        answer, sources = qa.answer(req.prompt)
+        return ChatResponse(
+            answer=answer,
+            sources=sources,
+            session_id=req.session_id
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/upload", response_model=UploadResponse)
+async def upload_documents(files: List[UploadFile] = File(...)):
+    """Upload documents for ingestion into the vector store."""
+    try:
+        uploaded_files = []
+        for file in files:
+            contents = await file.read()
+            # TODO: Save file and process with utils
+            # For now, just acknowledge
+            uploaded_files.append(file.filename)
+
+        # TODO: Extract text, create embeddings, update vector store
+        # qa.ingest_documents(extracted_texts)
+
+        return UploadResponse(
+            count=len(files),
+            file_ids=uploaded_files,
+            message=f"Successfully uploaded {len(files)} files"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/health", response_model=HealthResponse)
+async def health_check():
+    """Health check endpoint."""
+    return HealthResponse(status="healthy")
 

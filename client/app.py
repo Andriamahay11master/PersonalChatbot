@@ -1,23 +1,60 @@
-#Use UI
+# client/app.py
 import streamlit as st
 import requests
 
+st.set_page_config(page_title="RAG Chatbot", layout="wide")
 st.title("Retrieval-Augmented QA Chatbot")
 
-uploaded = st.file_uploader("Upload documents", accept_multiple_files=True)
-if uploaded:
-    files = {f.name: f for f in uploaded}
-    # Send to backend /upload endpoint (multipart)
-    # Use requests.post with files parameter
+API_BASE = "http://localhost:8000/api"
 
+# -------------------------------
+# File upload section
+# -------------------------------
+uploaded_files = st.file_uploader(
+    "Upload documents (PDF, TXT, MD)",
+    type=["pdf", "txt", "md"],
+    accept_multiple_files=True
+)
+
+if uploaded_files:
+    st.info(f"{len(uploaded_files)} file(s) ready to upload")
+
+    if st.button("Upload Files"):
+        files_payload = [
+            ("files", (f.name, f, "application/octet-stream")) for f in uploaded_files
+        ]
+        try:
+            resp = requests.post(f"{API_BASE}/upload", files=files_payload)
+            resp.raise_for_status()
+            data = resp.json()
+            st.success(data.get("message", "Files uploaded successfully"))
+            st.write("Uploaded files:", data.get("file_ids", []))
+        except requests.exceptions.RequestException as e:
+            st.error(f"Upload failed: {e}")
+
+# -------------------------------
+# Chat section
+# -------------------------------
 user_input = st.text_input("Your question:")
-if st.button("Ask"):
-    # Send to backend /api/chat
-    resp = requests.post("http://localhost:8000/api/chat", json={"prompt": user_input})
-    st.write(resp.json().get("answer", "No answer"))
-    sources = resp.json().get("sources", [])
-    if sources:
-        st.write("Sources:")
-        for src in sources:
-            st.write(f"- {src}")
-    
+
+if st.button("Ask") and user_input.strip():
+    payload = {"prompt": user_input}
+
+    try:
+        resp = requests.post(f"{API_BASE}/chat", json=payload)
+        resp.raise_for_status()
+        data = resp.json()
+
+        answer = data.get("answer", "No answer")
+        sources = data.get("sources", [])
+
+        st.subheader("Answer")
+        st.write(answer)
+
+        if sources:
+            st.subheader("Sources")
+            for src in sources:
+                st.write(f"- {src}")
+
+    except requests.exceptions.RequestException as e:
+        st.error(f"Chat request failed: {e}")

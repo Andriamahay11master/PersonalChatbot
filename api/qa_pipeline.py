@@ -1,8 +1,8 @@
 # api/qa_pipeline.py
 
 from typing import List, Tuple
-from .embeddings import embed_texts
-from .vector_store import SimpleVectorStore
+from embeddings import embed_texts
+from vector_store import SimpleVectorStore
 
 
 class QAPipeline:

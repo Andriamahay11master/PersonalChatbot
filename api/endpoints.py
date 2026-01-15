@@ -5,13 +5,13 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from typing import List
 from starlette.concurrency import run_in_threadpool
 
-from .schemas import (
+from schemas import (
     ChatRequest,
     ChatResponse,
     UploadResponse,
     HealthResponse,
 )
-from .qa_pipeline import QAPipeline
+from qa_pipeline import QAPipeline
 
 router = APIRouter()
 

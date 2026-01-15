@@ -1,6 +1,7 @@
 # api/vector_store.py
 import faiss
 import numpy as np
+from typing import List
 
 class SimpleVectorStore:
     def __init__(self, dim: int, index_path: str = "data/index.faiss"):

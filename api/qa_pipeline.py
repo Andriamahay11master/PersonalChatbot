@@ -1,4 +1,5 @@
 # api/qa_pipeline.py
+from typing import List
 from .embeddings import embed_texts
 from .vector_store import SimpleVectorStore
 

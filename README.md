@@ -92,7 +92,7 @@ api_port: 8000
 
    ```bash
    cd api
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   uvicorn main:app --reload
    ```
 
 2. **Start the client (in a separate terminal):**

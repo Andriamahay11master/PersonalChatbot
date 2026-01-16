@@ -8,3 +8,7 @@ faiss-cpu
 sentence-transformers
 python-multipart
 pyyaml
+python-dotenv
+langchain
+openai
+pypdf
